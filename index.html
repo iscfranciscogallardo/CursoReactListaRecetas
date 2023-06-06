@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Ejercicio sugerido recetas</title>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <script>
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+
+        const listaRecetas = [];
+        const listaIngredientes = [];
+
+        //evento para agregar
+        const submit = (event) => {
+            event.preventDefault();
+
+            let listaIngredientesInterna = [];
+            listaIngredientesInterna.push(listaIngredientes.map(valor =>
+                valor
+            ));
+
+            listaRecetas.push({
+                nombre: event.target.nombre.value,
+                ingredientes: listaIngredientesInterna,
+                tiempo: event.target.tiempo.value,
+                archivo: URL.createObjectURL(event.target.archivo.files[0])
+            });
+
+            // limpiar listado de ingredientes
+            listaIngredientes.length = 0;
+            //limpiar textbox
+            event.target.nombre.value = '';
+            event.target.tiempo.value = '';
+            event.target.archivo.value = '';
+
+            localStorage.setItem("listado", JSON.stringify(listaRecetas));
+            rederizarListado();
+        };
+
+        const rederizarListado = () => {
+            let listado = localStorage.getItem("listado");
+            let listadoRecetas = [];
+            if (listado != null)
+                listadoRecetas = JSON.parse(listado);
+            const listaUl = React.createElement('ul', null, listadoRecetas.map(({
+                nombre,
+                ingredientes,
+                tiempo,
+                archivo
+            }, index) => {
+                return React.createElement('li', {
+                    key: index
+                }, [
+                    React.createElement('h1', null, "Nombre de la receta: "),
+                    React.createElement('label', null, nombre),
+                    React.createElement('br', null, null),
+                    React.createElement('h2', null, "Ingredientes de la receta: "),
+                    React.createElement('ul', null, ingredientes.map((value) => {
+                        return React.createElement('li', null, value)
+                    })),
+                    React.createElement('br', null, null),
+                    React.createElement('h2', null, "Tiempo de preparación: "),
+                    React.createElement('label', null, tiempo),
+                    React.createElement('br', null, null),
+                    React.createElement('img', {
+                        src: archivo,
+                        style: {
+                            width: "100px"
+                        }
+                    })
+                ])
+            }));
+            root.render([form, listaUl]);
+        };
+
+        const agregarIngrediente = (event) => {
+            event.preventDefault();
+            listaIngredientes.push(document.getElementsByName("ingrediente")[0].value);
+            document.getElementsByName("ingrediente")[0].value = "";
+            document.getElementsByName("ingrediente")[0].focus();
+        };
+
+        const eliminarLocalStorage = (event) => {
+            event.preventDefault();
+            localStorage.removeItem("listado");
+            rederizarListado();
+        };
+
+        // creación de formulario con sus componentes
+        const form = React.createElement('form', {
+            onSubmit: submit
+        }, [
+            React.createElement('label', null, 'Nombre de la receta: '),
+            React.createElement('input', {
+                type: 'text',
+                name: 'nombre'
+            }),
+            React.createElement('br', null, null),
+            React.createElement('label', null, 'Litado de Ingredientes: '),
+            React.createElement('input', {
+                type: 'text',
+                name: 'ingrediente'
+            }),
+            React.createElement('button', {
+                type: 'button',
+                onClick: agregarIngrediente
+            }, 'Agregar ingrediente'),
+            React.createElement('br', null, null),
+            React.createElement('label', null, 'Tiempo de preparación: '),
+            React.createElement('input', {
+                type: 'text',
+                name: 'tiempo'
+            }),
+            React.createElement('br', null, null),
+            React.createElement('label', null, 'Imagen: '),
+            React.createElement('input', {
+                type: 'file',
+                name: 'archivo',
+                accept: ".jpg, .jpeg, .png"
+            }),
+            React.createElement('br', null, null),
+            React.createElement('button', {
+                type: 'submit'
+            }, 'Agregar receta'),
+            React.createElement('button', {
+                type: 'button',
+                onClick: eliminarLocalStorage
+            }, 'Eliminar almacenamiento')
+        ]);
+
+        //render inicial
+        rederizarListado();
+    </script>
+
+</body>
+
+</html>
